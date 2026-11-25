@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="en"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwNzk0NzI3NTkyNzQ5NjU5NjUxMiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzI1MzA1NGE1ZWQ4YjJmNTBfaW52aXRhdGlvbi5odG1sLTIyOSJ9LCJleHAiOjE3OTU2NDE3NzksImlhdCI6MTc5NTYzODE3OSwiYWxnIjoiUlMyNTYifQ.a9y2tOfZol1icW2VPtVl2skKJ749XC8XVOoEXU2MeEwd8-8PLYuIzcTH6ke6XPizFEhO3R3oZQbiyXDhAZ1VjhVDDD5cJrxsBKbwFY_0OcRhsmPwfsz7Dhb7p-Zl6nw6olIxUzd8HDMnAh7XoCuOOyAlrZBJgVvzfQ--lhshSsliCeQa9UYAg0CJgxlDbu-YRds3RxHNjT7hcGznUG5zfCY1wjE2cWx7tIJguLxqMnRt8jwutH6CbBgpmXJgw9-AOjobuUTw_PuS8ShYpkvpBhxTNK2dhmaDdnZmBbF2x8V9cTHpBwd_t4Gsi2IKC8RyVl8qrDIDebgoshwxgV_PgA","c_253054a5ed8b2f50_invitation.html-229")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.i=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.extensions="";var l=0,t=null,r=null,q=[],F=new TextEncoder,
+G=new TextDecoder;c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*
+16|0;return(f==="x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;
+(g=t)==null||g.postMessage(a)}};Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  const OVERLAY_SELECTOR =
+    'dialog[open], [role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], [role="combobox"]';
+
+  function isVisibleOverlay(element) {
+    if (element.closest('[hidden], [aria-hidden="true"], [inert]')) {
+      return false;
+    }
+    if (window.getComputedStyle(element).visibility === 'hidden') {
+      return false;
+    }
+    for (let cur = element; cur; cur = cur.parentElement) {
+      if (window.getComputedStyle(cur).display === 'none') {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function hasOpenOverlay() {
+    const candidates = document.querySelectorAll(OVERLAY_SELECTOR);
+    for (let i = 0; i < candidates.length; i++) {
+      if (isVisibleOverlay(candidates[i])) {
+        return true;
+      }
+    }
+    try {
+      if (document.querySelector('[popover]:popover-open')) {
+        return true;
+      }
+    } catch (e) {
+      // Ignore engines that do not support :popover-open.
+    }
+    return false;
+  }
+
+  function isNonEmptySearchInput(target) {
+    return (
+      Boolean(target) &&
+      target.tagName === 'INPUT' &&
+      typeof target.type === 'string' &&
+      target.type.toLowerCase() === 'search' &&
+      typeof target.value === 'string' &&
+      target.value.length > 0
+    );
+  }
+
+  function shouldIgnoreEscape(event) {
+    return (
+      event.key !== 'Escape' ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.isComposing ||
+      event.repeat ||
+      event.keyCode === 229 ||
+      isNonEmptySearchInput(event.target)
+    );
+  }
+
+  let shouldIgnoreCaptureState = false;
+
+  window.addEventListener(
+    'keydown',
+    function(event) {
+      if (event.key === 'Escape') {
+        shouldIgnoreCaptureState =
+          hasOpenOverlay() || isNonEmptySearchInput(event.target);
+      }
+    },
+    {capture: true},
+  );
+
+  window.addEventListener('keydown', function(event) {
+    if (
+      shouldIgnoreEscape(event) ||
+      event.defaultPrevented ||
+      shouldIgnoreCaptureState
+    ) {
+      return;
+    }
+    const wasBlockedOnCapture = shouldIgnoreCaptureState;
+    queueMicrotask(function() {
+      if (event.defaultPrevented || wasBlockedOnCapture) {
+        return;
+      }
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({'type': 'escapeKey'}, '*');
+      }
+    });
+  });
+})();</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celestial Orbit — Interactive Invitation &amp; Thank You</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cormorant Garamond & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        /* ==========================================================================
+           3 REFINED CELESTIAL BLUE PALETTES
+           ========================================================================== */
+        
+        /* Palette 1: Midnight Cosmos - Deep Prussian/Midnight Blue & Champagne Gold */
+        :root, [data-theme="cosmos"] {
+            --bg-core: #0d1d3a;
+            --bg-deep: #040914;
+            --nebula-1: rgba(34, 76, 152, 0.28);
+            --nebula-2: rgba(180, 146, 86, 0.12);
+            --space-line: rgba(186, 212, 248, 0.2);
+            --foil-primary: #e6cfa3;
+            --foil-secondary: #b99658;
+            --foil-glow: rgba(230, 207, 163, 0.35);
+
+            --stage-text: #eef4fc;
+            --stage-muted: #9ab2d6;
+
+            --env-body: #112242;
+            --env-flap-top: #182e57;
+            --env-flap-left: #14274a;
+            --env-flap-right: #10203d;
+            --env-flap-bottom: #162b52;
+            --env-vellum: rgba(24, 46, 87, 0.72);
+            --env-border: rgba(230, 207, 163, 0.34);
+
+            --seal-light: #f0dec0;
+            --seal-mid: #cba86b;
+            --seal-dark: #8c6c36;
+            --seal-text: #101b33;
+
+            --card-bg: #f8fbff;
+            --card-tint: #eef5fc;
+            --card-border: rgba(185, 150, 88, 0.42);
+            --card-text: #0f1c36;
+            --card-muted: #465a7d;
+            --card-accent: #244b85;
+            --card-accent-soft: rgba(36, 75, 133, 0.07);
+            --sweep-beam: rgba(230, 207, 163, 0.75);
+        }
+
+        /* Palette 2: Twilight Nebula - Royal Indigo & Icy Celestial Cyan */
+        [data-theme="nebula"] {
+            --bg-core: #162352;
+            --bg-deep: #070b21;
+            --nebula-1: rgba(56, 114, 214, 0.3);
+            --nebula-2: rgba(114, 216, 247, 0.16);
+            --space-line: rgba(154, 222, 247, 0.22);
+            --foil-primary: #9ee3fa;
+            --foil-secondary: #5cb3d6;
+            --foil-glow: rgba(158, 227, 250, 0.36);
+
+            --stage-text: #f0f8ff;
+            --stage-muted: #9ac3e0;
+
+            --env-body: #19285c;
+            --env-flap-top: #223578;
+            --env-flap-left: #1d2e69;
+            --env-flap-right: #172557;
+            --env-flap-bottom: #203270;
+            --env-vellum: rgba(34, 53, 120, 0.72);
+            --env-border: rgba(158, 227, 250, 0.35);
+
+            --seal-light: #d9f3fc;
+            --seal-mid: #8acbe3;
+            --seal-dark: #4886a3;
+            --seal-text: #0c1736;
+
+            --card-bg: #f7fcff;
+            --card-tint: #ebf6fc;
+            --card-border: rgba(92, 179, 214, 0.44);
+            --card-text: #0e1b3b;
+            --card-muted: #435b82;
+            --card-accent: #1d5d8a;
+            --card-accent-soft: rgba(29, 93, 138, 0.08);
+            --sweep-beam: rgba(158, 227, 250, 0.8);
+        }
+
+        /* Palette 3: Nordic Starlight - Dusk Slate Blue & Warm Pearl Silver */
+        [data-theme="nordic"] {
+            --bg-core: #223552;
+            --bg-deep: #0e1726;
+            --nebula-1: rgba(79, 114, 163, 0.28);
+            --nebula-2: rgba(232, 225, 211, 0.14);
+            --space-line: rgba(224, 232, 245, 0.22);
+            --foil-primary: #ebe3d5;
+            --foil-secondary: #b5aa99;
+            --foil-glow: rgba(235, 227, 213, 0.32);
+
+            --stage-text: #f7f6f2;
+            --stage-muted: #bcc8db;
+
+            --env-body: #263b59;
+            --env-flap-top: #30496e;
+            --env-flap-left: #2a4161;
+            --env-flap-right: #223552;
+            --env-flap-bottom: #2d4566;
+            --env-vellum: rgba(48, 73, 110, 0.72);
+            --env-border: rgba(235, 227, 213, 0.35);
+
+            --seal-light: #f5efe4;
+            --seal-mid: #c9beab;
+            --seal-dark: #8c816f;
+            --seal-text: #182538;
+
+            --card-bg: #fcfbf7;
+            --card-tint: #f3f0e8;
+            --card-border: rgba(181, 170, 153, 0.46);
+            --card-text: #19263b;
+            --card-muted: #4e5e78;
+            --card-accent: #2e4d78;
+            --card-accent-soft: rgba(46, 77, 120, 0.08);
+            --sweep-beam: rgba(235, 227, 213, 0.78);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at 50% 42%, var(--bg-core) 0%, var(--bg-deep) 100%);
+            color: var(--stage-text);
+            min-height: 100dvh;
+            margin: 0;
+            overflow-x: hidden;
+            transition: background 0.75s ease;
+        }
+
+        .font-serif-editorial {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+        }
+
+        /* ==========================================================================
+           PARALLAX SPACE ATMOSPHERE & NEBULA LAYERS
+           ========================================================================== */
+        .space-atmosphere {
+            position: fixed;
+            inset: -40px;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .nebula-cloud {
+            position: absolute;
+            border-radius: 9999px;
+            filter: blur(75px);
+            opacity: 0.9;
+            transition: background 0.75s ease;
+        }
+
+        .nebula-1 {
+            width: 55vw;
+            height: 55vw;
+            top: -10%;
+            left: 10%;
+            background: var(--nebula-1);
+            animation: driftNebula 22s ease-in-out infinite alternate;
+        }
+
+        .nebula-2 {
+            width: 48vw;
+            height: 48vw;
+            bottom: -12%;
+            right: 5%;
+            background: var(--nebula-2);
+            animation: driftNebula 28s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes driftNebula {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(35px, -25px) scale(1.08); }
+        }
+
+        .parallax-layer {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            will-change: transform;
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes slowOrbitCW {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slowOrbitCCW {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+
+        @keyframes twinklePulse {
+            0%, 100% { opacity: 0.22; transform: scale(0.85); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .orbit-cw { transform-origin: 720px 450px; animation: slowOrbitCW 140s linear infinite; }
+        .orbit-ccw { transform-origin: 720px 450px; animation: slowOrbitCCW 190s linear infinite; }
+        .twinkle-a { animation: twinklePulse 3.6s ease-in-out infinite; }
+        .twinkle-b { animation: twinklePulse 5.1s ease-in-out infinite 1.4s; }
+        .twinkle-c { animation: twinklePulse 4.3s ease-in-out infinite 2.5s; }
+
+        /* ==========================================================================
+           ZERO-GRAVITY ARCHITECTURAL CELESTIAL ENVELOPE
+           ========================================================================== */
+        .stage {
+            perspective: 1800px;
+            width: 100%;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes zeroGravityFloat {
+            0%, 100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+            50% { transform: translateY(-9px) rotateX(1.5deg) rotateY(-1.5deg); }
+        }
+
+        .envelope-float-container {
+            animation: zeroGravityFloat 6.5s ease-in-out infinite;
+            transform-style: preserve-3d;
+        }
+
+        .envelope-float-container.is-opening,
+        .envelope-float-container.is-swept-away {
+            animation: none;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            width: min(92vw, 450px);
+            height: min(63vw, 298px);
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.8s ease;
+            user-select: none;
+        }
+
+        .envelope-wrapper:not(.is-open):hover {
+            transform: scale(1.022) translateY(-4px);
+        }
+
+        /* Swept Away State: Envelope glides cleanly downward/aside with graceful 3D tilt */
+        .envelope-wrapper.is-swept-away {
+            transform: translate3d(-18vw, 68vh, -260px) rotateZ(-14deg) rotateX(28deg) scale(0.52);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Envelope Back Base with Double Foil Frame */
+        .envelope-back {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, var(--env-flap-top) 0%, var(--env-body) 100%);
+            border-radius: 16px;
+            box-shadow: 
+                0 32px 68px -12px rgba(2, 5, 14, 0.78),
+                0 0 0 1px var(--env-border),
+                0 0 48px -8px var(--foil-glow);
+            transition: background 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        /* Translucent Vellum Star-Chart Inner Lining */
+        .envelope-vellum-lining {
+            position: absolute;
+            inset: 6px;
+            border-radius: 12px;
+            background: var(--env-vellum);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* Envelope Pocket (Left, Right, Bottom Flaps + Architectural Orbital Engraving) */
+        .envelope-pocket-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        /* Top Architectural Flap */
+        .envelope-top-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 59%;
+            z-index: 4;
+            transform-origin: top center;
+            transition: transform 0.8s cubic-bezier(0.38, 0.02, 0.22, 1), z-index 0.05s linear 0.36s;
+            pointer-events: none;
+        }
+
+        .envelope-wrapper.is-open .envelope-top-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        /* Multi-Ringed Astrolabe / Planet Wax Seal */
+        .wax-seal-assembly {
+            position: absolute;
+            top: 53%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 84px;
+            height: 84px;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+        }
+
+        .astrolabe-ring-outer {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            color: var(--foil-primary);
+            opacity: 0.78;
+            transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .envelope-wrapper:not(.is-open):hover .astrolabe-ring-outer {
+            transform: rotate(65deg) scale(1.06);
+        }
+
+        .wax-seal-core {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            border-radius: 9999px;
+            background: radial-gradient(circle at 30% 28%, var(--seal-light), var(--seal-mid) 58%, var(--seal-dark) 100%);
+            color: var(--seal-text);
+            box-shadow: 
+                0 10px 24px rgba(0, 0, 0, 0.48),
+                inset 0 2px 4px rgba(255, 255, 255, 0.65),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.38),
+                0 0 20px var(--foil-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wax-seal-core::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.55);
+        }
+
+        .envelope-wrapper.is-open .wax-seal-assembly {
+            transform: translate(-50%, -50%) scale(0.25) rotate(90deg);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Cosmic Shockwave Pulse Ring on Unseal */
+        .cosmic-shockwave {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 80px;
+            border-radius: 9999px;
+            border: 2px solid var(--foil-primary);
+            box-shadow: 0 0 28px var(--foil-glow), inset 0 0 18px var(--foil-glow);
+            transform: translate(-50%, -50%) scale(0.2);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 25;
+        }
+
+        @keyframes shockwaveExpand {
+            0% {
+                transform: translate(-50%, -50%) scale(0.2);
+                opacity: 0.95;
+                border-width: 3px;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(16);
+                opacity: 0;
+                border-width: 0.5px;
+            }
+        }
+
+        .cosmic-shockwave.is-active {
+            animation: shockwaveExpand 1.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Letter Rising Preview Inside Envelope */
+        .letter-rising-card {
+            position: absolute;
+            left: 6%;
+            right: 6%;
+            top: 8%;
+            bottom: 8%;
+            background: linear-gradient(180deg, var(--card-bg) 0%, var(--card-tint) 100%);
+            color: var(--card-text);
+            border-radius: 12px;
+            z-index: 2;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+            transition: transform 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.24s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 1.25rem;
+            border: 1px solid var(--card-border);
+        }
+
+        .envelope-wrapper.is-open .letter-rising-card {
+            transform: translateY(-64%);
+        }
+
+        /* ==========================================================================
+           SIGNATURE LUMINOUS COMET LIGHT-SWEEP OVERLAY
+           ========================================================================== */
+        .comet-sweep-beam {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 35;
+            background: linear-gradient(
+                115deg,
+                transparent 20%,
+                rgba(255, 255, 255, 0.05) 38%,
+                var(--sweep-beam) 50%,
+                rgba(255, 255, 255, 0.12) 54%,
+                transparent 72%
+            );
+            transform: translateX(-130%) skewX(-18deg);
+            opacity: 0;
+        }
+
+        @keyframes cometSweepAcross {
+            0% {
+                transform: translateX(-130%) skewX(-18deg);
+                opacity: 0;
+            }
+            18% {
+                opacity: 0.85;
+            }
+            82% {
+                opacity: 0.85;
+            }
+            100% {
+                transform: translateX(130%) skewX(-18deg);
+                opacity: 0;
+            }
+        }
+
+        .comet-sweep-beam.is-sweeping {
+            animation: cometSweepAcross 0.95s cubic-bezier(0.25, 0.9, 0.35, 1) forwards;
+        }
+
+        /* ==========================================================================
+           SWEPT-IN LUXURY THANK-YOU & INVITATION LETTER CARD
+           ========================================================================== */
+        .letter-reader-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.45s ease;
+            overflow-y: auto;
+            perspective: 1600px;
+        }
+
+        .letter-reader-overlay.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .letter-card {
+            background: linear-gradient(165deg, var(--card-bg) 0%, var(--card-tint) 100%);
+            color: var(--card-text);
+            width: 100%;
+            max-width: 570px;
+            border-radius: 20px;
+            padding: 1.25rem;
+            position: relative;
+            box-shadow: 
+                0 35px 80px -15px rgba(2, 6, 18, 0.68),
+                0 0 0 1px var(--card-border),
+                0 0 45px -12px var(--foil-glow);
+            /* Starts tilted/swept below and unfolds forward in 3D space */
+            transform: translate3d(10vw, 32vh, -220px) rotateX(24deg) rotateZ(5deg) scale(0.76);
+            opacity: 0;
+            transition: 
+                transform 0.92s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.65s ease;
+            margin: auto;
+            overflow: hidden;
+        }
+
+        @media (min-width: 640px) {
+            .letter-card {
+                padding: 2rem;
+            }
+        }
+
+        .letter-reader-overlay.is-visible .letter-card {
+            transform: translate3d(0, 0, 0) rotateX(0deg) rotateZ(0deg) scale(1);
+            opacity: 1;
+        }
+
+        /* Subtle Foil Shimmer Sweep Across the Opened Card */
+        .card-foil-shimmer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(
+                120deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.55) 50%,
+                transparent 70%
+            );
+            transform: translateX(-140%);
+            z-index: 5;
+        }
+
+        .letter-reader-overlay.is-visible .card-foil-shimmer {
+            animation: cardShimmerOnce 1.3s ease-out 0.45s forwards;
+        }
+
+        @keyframes cardShimmerOnce {
+            0% { transform: translateX(-140%); }
+            100% { transform: translateX(140%); }
+        }
+
+        .letter-inner-frame {
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.75rem 1.35rem;
+            position: relative;
+            background: rgba(255, 255, 255, 0.45);
+        }
+
+        @media (min-width: 640px) {
+            .letter-inner-frame {
+                padding: 2.5rem 2.35rem;
+            }
+        }
+
+        /* Staggered Typography Reveal Inside Card */
+        .reveal-step {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .letter-reader-overlay.is-visible .reveal-step {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .letter-reader-overlay.is-visible .reveal-d1 { transition-delay: 0.25s; }
+        .letter-reader-overlay.is-visible .reveal-d2 { transition-delay: 0.36s; }
+        .letter-reader-overlay.is-visible .reveal-d3 { transition-delay: 0.47s; }
+        .letter-reader-overlay.is-visible .reveal-d4 { transition-delay: 0.58s; }
+        .letter-reader-overlay.is-visible .reveal-d5 { transition-delay: 0.69s; }
+        .letter-reader-overlay.is-visible .reveal-d6 { transition-delay: 0.80s; }
+
+        /* Stage Header & Prompt Fade */
+        .stage-fade {
+            transition: opacity 0.45s ease, transform 0.45s ease;
+        }
+
+        .is-opened-state .stage-fade {
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+        }
+
+        /* Stardust Canvas */
+        #stardustCanvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 40;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 9999px; }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-y-0{top:0px;bottom:0px}.bottom-3{bottom:0.75rem}.bottom-5{bottom:1.25rem}.left-1\/2{left:50%}.left-3{left:0.75rem}.right-0{right:0px}.right-3{right:0.75rem}.right-4{right:1rem}.top-3{top:0.75rem}.top-4{top:1rem}.z-50{z-index:50}.col-span-2{grid-column:span 2 / span 2}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-2{margin-bottom:0.5rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-7{margin-top:1.75rem}.mt-8{margin-top:2rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.h-11{height:2.75rem}.h-12{height:3rem}.h-4{height:1rem}.h-full{height:100%}.h-px{height:1px}.w-11{width:2.75rem}.w-12{width:3rem}.w-14{width:3.5rem}.w-4{width:1rem}.w-full{width:100%}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-full{--tw-translate-x:100%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;user-select:none}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.overflow-y-auto{overflow-y:auto}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-l{border-left-width:1px}.border-t{border-top-width:1px}.border-amber-300\/80{border-color:rgb(252 211 77 / 0.8)}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-slate-800{--tw-border-opacity:1;border-color:rgb(30 41 59 / var(--tw-border-opacity, 1))}.border-white\/20{border-color:rgb(255 255 255 / 0.2)}.border-white\/40{border-color:rgb(255 255 255 / 0.4)}.bg-\[\#0d1d3a\]{--tw-bg-opacity:1;background-color:rgb(13 29 58 / var(--tw-bg-opacity, 1))}.bg-\[\#162352\]{--tw-bg-opacity:1;background-color:rgb(22 35 82 / var(--tw-bg-opacity, 1))}.bg-\[\#223552\]{--tw-bg-opacity:1;background-color:rgb(34 53 82 / var(--tw-bg-opacity, 1))}.bg-current{background-color:currentColor}.bg-sky-500{--tw-bg-opacity:1;background-color:rgb(14 165 233 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-slate-900\/90{background-color:rgb(15 23 42 / 0.9)}.bg-slate-900\/95{background-color:rgb(15 23 42 / 0.95)}.bg-slate-950\/95{background-color:rgb(2 6 23 / 0.95)}.bg-white\/10{background-color:rgb(255 255 255 / 0.1)}.bg-gradient-to-tr{background-image:linear-gradient(to top right, var(--tw-gradient-stops))}.from-\[\#4886a3\]{--tw-gradient-from:#4886a3 var(--tw-gradient-from-position);--tw-gradient-to:rgb(72 134 163 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-\[\#8c6c36\]{--tw-gradient-from:#8c6c36 var(--tw-gradient-from-position);--tw-gradient-to:rgb(140 108 54 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-\[\#8c816f\]{--tw-gradient-from:#8c816f var(--tw-gradient-from-position);--tw-gradient-to:rgb(140 129 111 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-\[\#d9f3fc\]{--tw-gradient-to:#d9f3fc var(--tw-gradient-to-position)}.to-\[\#f0dec0\]{--tw-gradient-to:#f0dec0 var(--tw-gradient-to-position)}.to-\[\#f5efe4\]{--tw-gradient-to:#f5efe4 var(--tw-gradient-to-position)}.p-2{padding:0.5rem}.p-2\.5{padding:0.625rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.tracking-\[0\.25em\]{letter-spacing:0.25em}.tracking-\[0\.26em\]{letter-spacing:0.26em}.tracking-\[0\.3em\]{letter-spacing:0.3em}.tracking-wide{letter-spacing:0.025em}.tracking-wider{letter-spacing:0.05em}.tracking-widest{letter-spacing:0.1em}.text-slate-100{--tw-text-opacity:1;color:rgb(241 245 249 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-950{--tw-text-opacity:1;color:rgb(2 6 23 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.opacity-0{opacity:0}.opacity-35{opacity:0.35}.opacity-40{opacity:0.4}.opacity-50{opacity:0.5}.opacity-60{opacity:0.6}.opacity-65{opacity:0.65}.opacity-80{opacity:0.8}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sky-500\/20{--tw-shadow-color:rgb(14 165 233 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.drop-shadow-lg{--tw-drop-shadow:drop-shadow(0 10px 8px rgb(0 0 0 / 0.04)) drop-shadow(0 4px 3px rgb(0 0 0 / 0.1));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-xl{--tw-backdrop-blur:blur(24px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.ease-out{transition-timing-function:cubic-bezier(0, 0, 0.2, 1)}.hover\:bg-sky-400:hover{--tw-bg-opacity:1;background-color:rgb(56 189 248 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-800:hover{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.hover\:bg-white\/20:hover{background-color:rgb(255 255 255 / 0.2)}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:opacity-80:hover{opacity:0.8}.focus\:border-sky-400:focus{--tw-border-opacity:1;border-color:rgb(56 189 248 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}@media (min-width: 640px){.sm\:p-5{padding:1.25rem}.sm\:text-left{text-align:left}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}}</style></head>
+<body data-theme="cosmos">
+
+    <!-- 3-Layer Parallax Celestial Space Backdrop -->
+    <div class="space-atmosphere" aria-hidden="true">
+        <div class="nebula-cloud nebula-1"></div>
+        <div class="nebula-cloud nebula-2"></div>
+
+        <!-- Parallax Layer 1: Deep Distant Starfield -->
+        <svg id="parallaxLayer1" class="parallax-layer" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" style="transform: translate3d(-5.99156px, -8.55072px, 0px);">
+            <g fill="var(--foil-primary)" opacity="0.55">
+                <circle class="twinkle-a" cx="120" cy="110" r="1.2"></circle>
+                <circle class="twinkle-b" cx="310" cy="85" r="1.4"></circle>
+                <circle class="twinkle-c" cx="560" cy="140" r="1.1"></circle>
+                <circle class="twinkle-a" cx="890" cy="95" r="1.5"></circle>
+                <circle class="twinkle-b" cx="1190" cy="130" r="1.2"></circle>
+                <circle class="twinkle-c" cx="1340" cy="260" r="1.3"></circle>
+                <circle class="twinkle-a" cx="95" cy="490" r="1.4"></circle>
+                <circle class="twinkle-b" cx="260" cy="790" r="1.2"></circle>
+                <circle class="twinkle-c" cx="680" cy="820" r="1.5"></circle>
+                <circle class="twinkle-a" cx="1050" cy="790" r="1.2"></circle>
+                <circle class="twinkle-b" cx="1310" cy="690" r="1.4"></circle>
+            </g>
+        </svg>
+
+        <!-- Parallax Layer 2: Astrolabe Orbital Rings & Constellation Filigree -->
+        <svg id="parallaxLayer2" class="parallax-layer" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" style="transform: translate3d(-13.1814px, -18.8116px, 0px);">
+            <!-- Rotating Astrolabe Rings Behind Envelope -->
+            <g class="orbit-cw">
+                <circle cx="720" cy="450" r="290" fill="none" stroke="var(--space-line)" stroke-width="0.9" stroke-dasharray="3 9"></circle>
+                <circle cx="720" cy="450" r="415" fill="none" stroke="var(--space-line)" stroke-width="0.7"></circle>
+                <circle cx="720" cy="160" r="3.2" fill="var(--foil-primary)" opacity="0.7"></circle>
+                <circle cx="1135" cy="450" r="2.6" fill="var(--foil-primary)" opacity="0.55"></circle>
+            </g>
+            <g class="orbit-ccw">
+                <circle cx="720" cy="450" r="545" fill="none" stroke="var(--space-line)" stroke-width="0.65" stroke-dasharray="1 14"></circle>
+                <ellipse cx="720" cy="450" rx="475" ry="240" transform="rotate(-18 720 450)" fill="none" stroke="var(--space-line)" stroke-width="0.6"></ellipse>
+            </g>
+
+            <!-- Constellation Line Art: Bottom Left -->
+            <g stroke="var(--space-line)" stroke-width="0.95" fill="var(--foil-primary)" opacity="0.72">
+                <polyline points="115,725 175,688 225,715 278,668 325,692" fill="none" stroke-dasharray="3 4"></polyline>
+                <circle cx="115" cy="725" r="2"></circle>
+                <circle cx="175" cy="688" r="2.6"></circle>
+                <circle cx="225" cy="715" r="2"></circle>
+                <circle cx="278" cy="668" r="3"></circle>
+                <circle cx="325" cy="692" r="1.8"></circle>
+            </g>
+
+            <!-- Constellation Line Art: Top Right -->
+            <g stroke="var(--space-line)" stroke-width="0.95" fill="var(--foil-primary)" opacity="0.72">
+                <polyline points="1115,175 1175,148 1222,186 1285,152" fill="none" stroke-dasharray="3 4"></polyline>
+                <circle cx="1115" cy="175" r="2"></circle>
+                <circle cx="1175" cy="148" r="2.7"></circle>
+                <circle cx="1222" cy="186" r="2"></circle>
+                <circle cx="1285" cy="152" r="2.5"></circle>
+            </g>
+        </svg>
+
+        <!-- Parallax Layer 3: Foreground Crescent Moon, Ringed Planet & Four-Point Stars -->
+        <svg id="parallaxLayer3" class="parallax-layer" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" style="transform: translate3d(-21.5696px, -30.7826px, 0px);">
+            <!-- Top-Left Minimalist Crescent Moon -->
+            <g transform="translate(155, 135)">
+                <path d="M 34,4 A 36,36 0 1,0 68,48 A 28,28 0 1,1 34,4 Z" fill="none" stroke="var(--foil-primary)" stroke-width="1.25" opacity="0.62"></path>
+                <path d="M 76,28 L 78,34 L 84,36 L 78,38 L 76,44 L 74,38 L 68,36 L 74,34 Z" fill="var(--foil-primary)" opacity="0.75"></path>
+            </g>
+
+            <!-- Bottom-Right Minimalist Ringed Planet -->
+            <g transform="translate(1175, 665)">
+                <circle cx="48" cy="48" r="23" fill="none" stroke="var(--foil-primary)" stroke-width="1.2" opacity="0.58"></circle>
+                <ellipse cx="48" cy="48" rx="50" ry="13" transform="rotate(-22 48 48)" fill="none" stroke="var(--space-line)" stroke-width="1.3"></ellipse>
+                <circle cx="96" cy="26" r="2.2" fill="var(--foil-primary)" opacity="0.7"></circle>
+            </g>
+
+            <!-- Crisp Four-Point Sparkle Stars -->
+            <g fill="var(--foil-primary)">
+                <path class="twinkle-a" d="M 355,225 L 357,232 L 364,234 L 357,236 L 355,243 L 353,236 L 346,234 L 353,232 Z"></path>
+                <path class="twinkle-b" d="M 1055,295 L 1057,302 L 1064,304 L 1057,306 L 1055,313 L 1053,306 L 1046,304 L 1053,302 Z"></path>
+                <path class="twinkle-c" d="M 415,635 L 416.5,641 L 422.5,642.5 L 416.5,644 L 415,650 L 413.5,644 L 407.5,642.5 L 413.5,641 Z"></path>
+                <path class="twinkle-a" d="M 975,575 L 976.5,580.5 L 982,582 L 976.5,583.5 L 975,589 L 973.5,583.5 L 968,582 L 973.5,580.5 Z"></path>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Cosmic Shockwave Ring & Sweeping Comet Light-Beam -->
+    <div id="cosmicShockwave" class="cosmic-shockwave" aria-hidden="true"></div>
+    <div id="cometSweepBeam" class="comet-sweep-beam" aria-hidden="true"></div>
+
+    <!-- Stardust Particle Canvas -->
+    <canvas id="stardustCanvas" width="948" height="828"></canvas>
+
+    <!-- Top-Right Host Customization Button (Auto-removed on Guest Export) -->
+    
+
+    <!-- ==========================================================================
+         MAIN 3D STAGE: ARCHITECTURAL CELESTIAL ENVELOPE
+         ========================================================================== -->
+    <main id="mainStage" class="stage">
+        
+        <!-- Envelope Header -->
+        <div id="envelopeHeader" class="stage-fade mb-8 text-center px-4">
+            <p id="displayCoverSubtitle" class="text-[11px] uppercase tracking-[0.3em] font-medium mb-1.5" style="color: var(--foil-primary);">
+                Celestial Dispatch
+            </p>
+            <h1 id="displayCoverTitle" class="font-serif-editorial text-2xl sm:text-3xl italic font-semibold tracking-wide" style="color: var(--stage-text);">Hey, you're invited!</h1>
+        </div>
+
+        <!-- Zero-Gravity Container -->
+        <div id="envelopeFloatContainer" class="envelope-float-container">
+            <div id="envelopeWrapper" class="envelope-wrapper" role="button" tabindex="0" aria-label="Tap seal to unseal envelope">
+                
+                <!-- Envelope Base -->
+                <div class="envelope-back"></div>
+
+                <!-- Translucent Vellum Star-Chart Inner Lining -->
+                <div class="envelope-vellum-lining">
+                    <svg class="w-full h-full opacity-35" viewBox="0 0 450 298" preserveAspectRatio="none">
+                        <circle cx="225" cy="149" r="115" fill="none" stroke="var(--foil-primary)" stroke-width="0.7" stroke-dasharray="2 5"></circle>
+                        <circle cx="225" cy="149" r="78" fill="none" stroke="var(--foil-primary)" stroke-width="0.5"></circle>
+                        <line x1="0" y1="149" x2="450" y2="149" stroke="var(--foil-primary)" stroke-width="0.4" stroke-dasharray="3 6"></line>
+                        <line x1="225" y1="0" x2="225" y2="298" stroke="var(--foil-primary)" stroke-width="0.4" stroke-dasharray="3 6"></line>
+                    </svg>
+                </div>
+
+                <!-- Rising Card Preview Inside Envelope -->
+                <div class="letter-rising-card">
+                    <span class="text-[10px] tracking-[0.25em] uppercase opacity-60 mb-1" style="color: var(--card-accent);">✦</span>
+                    <p id="peekHeader" class="font-serif-editorial text-xs italic tracking-wider opacity-80">A NOTE OF GRATITUDE</p>
+                </div>
+
+                <!-- Architectural Envelope Pocket with Gold-Foil Orbital Engravings -->
+                <svg class="envelope-pocket-svg" viewBox="0 0 450 298" preserveAspectRatio="none">
+                    <!-- Left Geometric Flap -->
+                    <polygon points="0,0 232,156 0,298" style="fill: var(--env-flap-left);"></polygon>
+                    <!-- Right Geometric Flap -->
+                    <polygon points="450,0 218,156 450,298" style="fill: var(--env-flap-right);"></polygon>
+                    <!-- Bottom Architectural Flap -->
+                    <polygon points="0,298 225,138 450,298" style="fill: var(--env-flap-bottom);"></polygon>
+                    
+                    <!-- Crisp Foil Seam Highlights -->
+                    <polyline points="0,0 225,152 450,0" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="1.2"></polyline>
+                    <polyline points="0,298 225,138 450,298" fill="none" stroke="var(--env-border)" stroke-width="1.1"></polyline>
+
+                    <!-- Bespoke Foil Orbital Arc & Constellation Filigree on Pocket -->
+                    <g stroke="var(--foil-primary)" fill="none" opacity="0.42">
+                        <path d="M 85,298 A 140,140 0 0,1 365,298" stroke-width="0.9" stroke-dasharray="3 5"></path>
+                        <path d="M 120,298 A 105,105 0 0,1 330,298" stroke-width="0.7"></path>
+                        <!-- Left Constellation Corner Filigree -->
+                        <polyline points="24,264 48,245 76,256 96,234" stroke-width="0.85"></polyline>
+                        <circle cx="24" cy="264" r="1.6" fill="var(--foil-primary)"></circle>
+                        <circle cx="48" cy="245" r="2" fill="var(--foil-primary)"></circle>
+                        <circle cx="76" cy="256" r="1.6" fill="var(--foil-primary)"></circle>
+                        <circle cx="96" cy="234" r="2.2" fill="var(--foil-primary)"></circle>
+                        <!-- Right Crescent & Star Filigree -->
+                        <path d="M 402,238 A 13,13 0 1,0 415,254 A 10,10 0 1,1 402,238 Z" stroke-width="0.95"></path>
+                        <circle cx="382" cy="260" r="1.6" fill="var(--foil-primary)"></circle>
+                        <circle cx="424" cy="232" r="1.5" fill="var(--foil-primary)"></circle>
+                    </g>
+                </svg>
+
+                <!-- Top Animated 3D Flap -->
+                <div class="envelope-top-flap">
+                    <svg class="w-full h-full drop-shadow-lg" viewBox="0 0 450 176" preserveAspectRatio="none">
+                        <path d="M 0,0 L 450,0 L 238,166 Q 225,175 212,166 Z" style="fill: var(--env-flap-top);"></path>
+                        <!-- Double Foil Trim Along Flap Edge -->
+                        <path d="M 6,2 L 214,163 Q 225,171 236,163 L 444,2" fill="none" stroke="var(--foil-primary)" stroke-width="1.1" opacity="0.55"></path>
+                        <path d="M 18,2 L 216,154 Q 225,161 234,154 L 432,2" fill="none" stroke="var(--foil-primary)" stroke-width="0.6" opacity="0.3"></path>
+                    </svg>
+                </div>
+
+                <!-- Multi-Ringed Astrolabe Wax Seal -->
+                <div class="wax-seal-assembly" id="waxSeal">
+                    <!-- Rotating Astrolabe SVG Ring -->
+                    <svg class="astrolabe-ring-outer" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="0.9" stroke-dasharray="3 4"></circle>
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="0.7"></circle>
+                        <!-- Cardinal Astrolabe Star Points -->
+                        <polygon points="50,1 52,7 48,7" fill="currentColor"></polygon>
+                        <polygon points="50,99 52,93 48,93" fill="currentColor"></polygon>
+                        <polygon points="1,50 7,52 7,48" fill="currentColor"></polygon>
+                        <polygon points="99,50 93,52 93,48" fill="currentColor"></polygon>
+                    </svg>
+                    <!-- Embossed Metallic Core -->
+                    <div class="wax-seal-core">
+                        <span id="displaySealInitial" class="font-serif-editorial text-xl font-bold tracking-wider select-none">✪</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Subtle Tap Prompt -->
+        <div class="stage-fade mt-8 flex flex-col items-center">
+            <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium tracking-widest uppercase border backdrop-blur-sm" style="background-color: rgba(255,255,255,0.05); border-color: var(--env-border); color: var(--stage-muted);">
+                <span style="color: var(--foil-primary);">✦</span>
+                Tap seal to unseal
+            </span>
+        </div>
+
+    </main>
+
+    <!-- ==========================================================================
+         SWEPT-IN LUXURY THANK-YOU & INVITATION LETTER CARD
+         ========================================================================== -->
+    <section id="letterOverlay" class="letter-reader-overlay" aria-hidden="true">
+        <div class="letter-card">
+            <!-- One-time Foil Shimmer Sweep across Card -->
+            <div class="card-foil-shimmer"></div>
+
+            <div class="letter-inner-frame">
+                
+                <!-- Architectural Corner Astrolabe Filigree -->
+                <svg class="absolute top-3 left-3 w-11 h-11 opacity-40 pointer-events-none" viewBox="0 0 44 44" style="color: var(--card-accent);">
+                    <path d="M 2,28 L 2,2 L 28,2" fill="none" stroke="currentColor" stroke-width="1"></path>
+                    <path d="M 2,14 A 12,12 0 0,0 14,2" fill="none" stroke="currentColor" stroke-width="0.8"></path>
+                    <circle cx="8" cy="8" r="1.5" fill="currentColor"></circle>
+                </svg>
+                <svg class="absolute top-3 right-3 w-11 h-11 opacity-40 pointer-events-none" viewBox="0 0 44 44" style="color: var(--card-accent);">
+                    <path d="M 16,2 L 42,2 L 42,28" fill="none" stroke="currentColor" stroke-width="1"></path>
+                    <path d="M 30,2 A 12,12 0 0,0 42,14" fill="none" stroke="currentColor" stroke-width="0.8"></path>
+                    <circle cx="36" cy="8" r="1.5" fill="currentColor"></circle>
+                </svg>
+                <svg class="absolute bottom-3 left-3 w-11 h-11 opacity-40 pointer-events-none" viewBox="0 0 44 44" style="color: var(--card-accent);">
+                    <path d="M 2,16 L 2,42 L 28,42" fill="none" stroke="currentColor" stroke-width="1"></path>
+                    <path d="M 14,42 A 12,12 0 0,0 2,30" fill="none" stroke="currentColor" stroke-width="0.8"></path>
+                    <circle cx="8" cy="36" r="1.5" fill="currentColor"></circle>
+                </svg>
+                <svg class="absolute bottom-3 right-3 w-11 h-11 opacity-40 pointer-events-none" viewBox="0 0 44 44" style="color: var(--card-accent);">
+                    <path d="M 16,42 L 42,42 L 42,16" fill="none" stroke="currentColor" stroke-width="1"></path>
+                    <path d="M 42,30 A 12,12 0 0,0 30,42" fill="none" stroke="currentColor" stroke-width="0.8"></path>
+                    <circle cx="36" cy="36" r="1.5" fill="currentColor"></circle>
+                </svg>
+
+                <!-- Celestial Astrolabe Crest (Stagger 1) -->
+                <div class="reveal-step reveal-d1 flex justify-center mb-4">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center relative" style="background-color: var(--card-accent-soft); color: var(--card-accent); border: 1px solid var(--card-border);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="9" stroke-dasharray="2 3" opacity="0.6"></circle>
+                            <path d="M12 5a5 5 0 0 0 7 7 7 7 0 1 1-7-7Z"></path>
+                            <circle cx="17" cy="7" r="1" fill="currentColor"></circle>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Greeting Subtitle (Stagger 2) -->
+                <p id="cardEyebrow" class="reveal-step reveal-d2 text-center text-[11px] uppercase tracking-[0.26em] font-semibold mb-2" style="color: var(--card-accent);">A NOTE OF GRATITUDE</p>
+
+                <!-- Main Headline (Stagger 3) -->
+                <h2 id="cardHeadline" class="reveal-step reveal-d3 font-serif-editorial text-3xl sm:text-4xl font-bold text-center leading-tight mb-4" style="color: var(--card-text);">Thank You for Being Part of My Orbit</h2>
+
+                <!-- Minimalist Orbital Divider (Stagger 3) -->
+                <div class="reveal-step reveal-d3 flex items-center justify-center gap-3 mb-6 opacity-50" style="color: var(--card-accent);">
+                    <span class="w-14 h-px bg-current"></span>
+                    <span class="text-xs">✦</span>
+                    <span class="w-14 h-px bg-current"></span>
+                </div>
+
+                <!-- Personal Thank-You Message (Stagger 4) -->
+                <div id="cardMessageBody" class="reveal-step reveal-d4 space-y-4 text-sm sm:text-base leading-relaxed text-center sm:text-left" style="color: var(--card-muted);"><p>It's been a while mate,</p><p>Stumbling upon each other in this vast expanse, what a coincidence! Still, it’s crazy how little time it took for us to click, time may have only just introduced us, yet this quiet closeness feels as though we’ve known each other forever. Honestly, there’s gotta be a reason our lives came to orbit around each other at this exact moment. And here we are, my graduation ceremony, where having you here makes this rendezvous feel even more complete.</p><p>Guess what? It doesn't take years to leave a mark and crossing paths with you has quietly reawakened a spark inside me, reminding me of my true north and the things that truly matter. Anyway, as cheesy as it sounds, thank you,  honestly,  for  being a noticeable part of my youth.</p><p>"If two points are destined to touch, the universe will always find a way to make the connection." - Savi Sharma</p></div>
+
+                <!-- Event / Celebration Details Box (Stagger 5) -->
+                <div id="eventDetailsBox" class="reveal-step reveal-d5 mt-7 p-4 sm:p-5 rounded-xl text-center space-y-1.5" style="background-color: var(--card-accent-soft); border: 1px solid var(--card-border);">
+                    <p id="cardDateTime" class="text-sm font-semibold tracking-wide" style="color: var(--card-text);">Sundaday, November 29, 2026 • 7:00 AM - 1:00 PM</p>
+                    <p id="cardLocation" class="text-xs sm:text-sm" style="color: var(--card-muted);">https://maps.app.goo.gl/EjDLDhSBmwM6xx9b8</p>
+                </div>
+
+                <!-- Sign-off & Sender Name (Stagger 6) -->
+                <div class="reveal-step reveal-d6 mt-7 text-center">
+                    <p id="cardSignoff" class="text-xs uppercase tracking-widest opacity-65 mb-1" style="color: var(--card-muted);">With warmest thanks,</p>
+                    <p id="cardSender" class="font-serif-editorial text-2xl sm:text-3xl italic font-semibold" style="color: var(--card-text);">LNHao</p>
+                </div>
+
+                <!-- Replay / Fold Back Button (Stagger 6) -->
+                <div class="reveal-step reveal-d6 mt-7 pt-4 border-t flex items-center justify-center" style="border-color: var(--card-border);">
+                    <button id="closeEnvelopeBtn" type="button" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium transition hover:opacity-80 cursor-pointer" style="background-color: var(--card-accent-soft); color: var(--card-accent);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                        Replay / Fold Back
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================================
+         CUSTOMIZATION DRAWER (Automatically removed when exported for guests)
+         ========================================================================== -->
+    
+
+    <!-- Toast Notification -->
+    
+
+    <script>
+        /**
+         * Interactive 3D Celestial Envelope, Parallax Starfield & Swept Transition Engine
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainStage = document.getElementById('mainStage');
+            const envelopeFloatContainer = document.getElementById('envelopeFloatContainer');
+            const envelopeWrapper = document.getElementById('envelopeWrapper');
+            const cosmicShockwave = document.getElementById('cosmicShockwave');
+            const cometSweepBeam = document.getElementById('cometSweepBeam');
+            const letterOverlay = document.getElementById('letterOverlay');
+            const closeEnvelopeBtn = document.getElementById('closeEnvelopeBtn');
+
+            const toggleCustomizeBtn = document.getElementById('toggleCustomizeBtn');
+            const customizerDrawer = document.getElementById('customizerDrawer');
+            const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+            const toastMessage = document.getElementById('toastMessage');
+
+            const layer1 = document.getElementById('parallaxLayer1');
+            const layer2 = document.getElementById('parallaxLayer2');
+            const layer3 = document.getElementById('parallaxLayer3');
+
+            let isEnvelopeOpen = false;
+            let transitionTimers = [];
+            let currentTheme = document.body.getAttribute('data-theme') || 'cosmos';
+
+            function showToast(text) {
+                if (!toastMessage) return;
+                toastMessage.textContent = text;
+                toastMessage.classList.remove('opacity-0');
+                setTimeout(() => toastMessage.classList.add('opacity-0'), 2800);
+            }
+
+            // ======================================================================
+            // 1. 3-LAYER DEPTH PARALLAX (Mouse & Mobile Orientation/Touch)
+            // ======================================================================
+            function applyParallax(normX, normY) {
+                if (layer1) layer1.style.transform = `translate3d(${normX * -10}px, ${normY * -10}px, 0)`;
+                if (layer2) layer2.style.transform = `translate3d(${normX * -22}px, ${normY * -22}px, 0)`;
+                if (layer3) layer3.style.transform = `translate3d(${normX * -36}px, ${normY * -36}px, 0)`;
+            }
+
+            window.addEventListener('mousemove', (e) => {
+                const normX = (e.clientX / window.innerWidth - 0.5) * 2;
+                const normY = (e.clientY / window.innerHeight - 0.5) * 2;
+                applyParallax(normX, normY);
+            }, { passive: true });
+
+            window.addEventListener('deviceorientation', (e) => {
+                if (e.gamma !== null && e.beta !== null) {
+                    const normX = Math.max(-1, Math.min(1, e.gamma / 30));
+                    const normY = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
+                    applyParallax(normX, normY);
+                }
+            }, { passive: true });
+
+            // ======================================================================
+            // 2. CHOREOGRAPHED 3-PHASE "SWEPT" OPENING & FOLD-BACK SEQUENCE
+            // ======================================================================
+            function clearTransitionTimers() {
+                transitionTimers.forEach(id => clearTimeout(id));
+                transitionTimers = [];
+            }
+
+            function openEnvelope() {
+                if (isEnvelopeOpen) return;
+                isEnvelopeOpen = true;
+                clearTransitionTimers();
+
+                // Phase 2: Unseal shockwave, flap opens in 3D, card rises from pocket
+                envelopeFloatContainer.classList.add('is-opening');
+                envelopeWrapper.classList.add('is-open');
+                mainStage.classList.add('is-opened-state');
+
+                cosmicShockwave.classList.remove('is-active');
+                void cosmicShockwave.offsetWidth; // trigger reflow
+                cosmicShockwave.classList.add('is-active');
+
+                // Phase 3 (at 560ms): Trigger Signature Swept Transition
+                const sweepTimer = setTimeout(() => {
+                    // Luminous comet light-beam sweeps across viewport
+                    cometSweepBeam.classList.remove('is-sweeping');
+                    void cometSweepBeam.offsetWidth;
+                    cometSweepBeam.classList.add('is-sweeping');
+
+                    // Opened envelope sweeps gracefully downward & aside in 3D space
+                    envelopeWrapper.classList.add('is-swept-away');
+
+                    // Launch sweeping stardust trail across the screen
+                    launchSweepingStardust();
+
+                    // Luxury letter card sweeps forward & unfolds into center view
+                    letterOverlay.classList.add('is-visible');
+                    letterOverlay.setAttribute('aria-hidden', 'false');
+                }, 560);
+
+                transitionTimers.push(sweepTimer);
+            }
+
+            function closeEnvelope() {
+                if (!isEnvelopeOpen) return;
+                isEnvelopeOpen = false;
+                clearTransitionTimers();
+
+                // Retract letter card back into space
+                letterOverlay.classList.remove('is-visible');
+                letterOverlay.setAttribute('aria-hidden', 'true');
+
+                // Sweep envelope back into center stage
+                const returnTimer = setTimeout(() => {
+                    envelopeWrapper.classList.remove('is-swept-away');
+                    
+                    // Fold flap closed and restore wax seal
+                    const foldTimer = setTimeout(() => {
+                        envelopeWrapper.classList.remove('is-open');
+                        mainStage.classList.remove('is-opened-state');
+                        envelopeFloatContainer.classList.remove('is-opening');
+                    }, 340);
+                    transitionTimers.push(foldTimer);
+                }, 260);
+
+                transitionTimers.push(returnTimer);
+            }
+
+            if (envelopeWrapper) {
+                envelopeWrapper.addEventListener('click', openEnvelope);
+                envelopeWrapper.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openEnvelope();
+                    }
+                });
+            }
+
+            if (closeEnvelopeBtn) {
+                closeEnvelopeBtn.addEventListener('click', closeEnvelope);
+            }
+
+            // ======================================================================
+            // 3. CUSTOMIZER DRAWER & LIVE DATA SYNC
+            // ======================================================================
+            if (toggleCustomizeBtn && customizerDrawer) {
+                toggleCustomizeBtn.addEventListener('click', () => {
+                    customizerDrawer.classList.remove('translate-x-full');
+                });
+            }
+
+            if (closeDrawerBtn && customizerDrawer) {
+                closeDrawerBtn.addEventListener('click', () => {
+                    customizerDrawer.classList.add('translate-x-full');
+                });
+            }
+
+            function applyTheme(themeName) {
+                currentTheme = themeName;
+                document.body.setAttribute('data-theme', themeName);
+                document.querySelectorAll('.theme-btn').forEach(btn => {
+                    if (btn.dataset.setTheme === themeName) {
+                        btn.classList.add('border-2', 'border-amber-300/80');
+                        btn.classList.remove('border', 'border-slate-700');
+                    } else {
+                        btn.classList.remove('border-2', 'border-amber-300/80');
+                        btn.classList.add('border', 'border-slate-700');
+                    }
+                });
+            }
+
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.addEventListener('click', () => applyTheme(btn.dataset.setTheme));
+            });
+
+            function syncInputsToCard() {
+                const coverTitleEl = document.getElementById('inputCoverTitle');
+                if (!coverTitleEl) return;
+
+                document.getElementById('displayCoverTitle').textContent = coverTitleEl.value || 'A Special Invitation & Thank You';
+                document.getElementById('displaySealInitial').textContent = document.getElementById('inputSealInitial').value || '✦';
+                document.getElementById('cardEyebrow').textContent = document.getElementById('inputEyebrow').value;
+                document.getElementById('peekHeader').textContent = document.getElementById('inputEyebrow').value || 'A Note of Gratitude';
+                document.getElementById('cardHeadline').textContent = document.getElementById('inputHeadline').value;
+
+                // Format multi-paragraph thank-you message
+                const rawMsg = document.getElementById('inputMessage').value;
+                const msgContainer = document.getElementById('cardMessageBody');
+                msgContainer.innerHTML = '';
+                rawMsg.split(/\n\s*\n/).forEach(block => {
+                    if (block.trim()) {
+                        const p = document.createElement('p');
+                        p.textContent = block.trim();
+                        msgContainer.appendChild(p);
+                    }
+                });
+
+                document.getElementById('cardDateTime').textContent = document.getElementById('inputDateTime').value;
+                document.getElementById('cardLocation').textContent = document.getElementById('inputLocation').value;
+                document.getElementById('cardSignoff').textContent = document.getElementById('inputSignoff').value;
+                document.getElementById('cardSender').textContent = document.getElementById('inputSender').value;
+            }
+
+            const editableIds = [
+                'inputCoverTitle', 'inputSealInitial', 'inputEyebrow',
+                'inputHeadline', 'inputMessage', 'inputDateTime',
+                'inputLocation', 'inputSignoff', 'inputSender'
+            ];
+            editableIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', syncInputsToCard);
+            });
+
+            // ======================================================================
+            // 4. STANDALONE GUEST-READY INDEX.HTML EXPORT
+            // ======================================================================
+            const downloadHtmlBtn = document.getElementById('downloadHtmlBtn');
+            if (downloadHtmlBtn) {
+                downloadHtmlBtn.addEventListener('click', () => {
+                    const clone = document.documentElement.cloneNode(true);
+                    const clonedBody = clone.querySelector('body');
+                    if (clonedBody) {
+                        clonedBody.setAttribute('data-theme', currentTheme);
+                    }
+
+                    // Reset any open/swept classes so guests start with the sealed envelope
+                    const clonedStage = clone.querySelector('#mainStage');
+                    const clonedFloat = clone.querySelector('#envelopeFloatContainer');
+                    const clonedEnv = clone.querySelector('#envelopeWrapper');
+                    const clonedOverlay = clone.querySelector('#letterOverlay');
+                    const clonedShockwave = clone.querySelector('#cosmicShockwave');
+                    const clonedBeam = clone.querySelector('#cometSweepBeam');
+
+                    if (clonedStage) clonedStage.classList.remove('is-opened-state');
+                    if (clonedFloat) clonedFloat.classList.remove('is-opening');
+                    if (clonedEnv) clonedEnv.classList.remove('is-open', 'is-swept-away');
+                    if (clonedShockwave) clonedShockwave.classList.remove('is-active');
+                    if (clonedBeam) clonedBeam.classList.remove('is-sweeping');
+                    if (clonedOverlay) {
+                        clonedOverlay.classList.remove('is-visible');
+                        clonedOverlay.setAttribute('aria-hidden', 'true');
+                    }
+
+                    // Strip out host editor controls & toast
+                    const clonedControls = clone.querySelector('#hostControls');
+                    const clonedDrawer = clone.querySelector('#customizerDrawer');
+                    const clonedToast = clone.querySelector('#toastMessage');
+                    if (clonedControls) clonedControls.remove();
+                    if (clonedDrawer) clonedDrawer.remove();
+                    if (clonedToast) clonedToast.remove();
+
+                    const finalHtml = '<!DOCTYPE html>\n' + clone.outerHTML;
+                    const blob = new Blob([finalHtml], { type: 'text/html;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'index.html';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+
+                    showToast('Downloaded guest-ready index.html!');
+                });
+            }
+
+            // ======================================================================
+            // 5. SWEEPING STARDUST COMET TRAIL CANVAS
+            // ======================================================================
+            const canvas = document.getElementById('stardustCanvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let animId = null;
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            function launchSweepingStardust() {
+                const paletteColors = {
+                    cosmos: ['#e6cfa3', '#fff6e0', '#9ec5ff', '#ffffff'],
+                    nebula: ['#9ee3fa', '#e6f8ff', '#a8c5ff', '#ffffff'],
+                    nordic: ['#ebe3d5', '#fffcf5', '#b8cde8', '#ffffff']
+                };
+                const colors = paletteColors[currentTheme] || paletteColors.cosmos;
+
+                // Spawn a diagonal sweeping arc of stardust from bottom-left to top-right
+                for (let i = 0; i < 85; i++) {
+                    const progress = i / 85;
+                    const startX = window.innerWidth * (0.12 + progress * 0.76) + (Math.random() - 0.5) * 90;
+                    const startY = window.innerHeight * (0.78 - progress * 0.56) + (Math.random() - 0.5) * 90;
+                    const sweepAngle = -0.55 + (Math.random() - 0.5) * 0.65;
+                    const speed = 2.2 + Math.random() * 5.2;
+
+                    particles.push({
+                        x: startX,
+                        y: startY,
+                        vx: Math.cos(sweepAngle) * speed,
+                        vy: Math.sin(sweepAngle) * speed,
+                        size: 1.8 + Math.random() * 3.5,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        alpha: 0.98,
+                        decay: 0.009 + Math.random() * 0.008,
+                        twinkleOffset: Math.random() * Math.PI * 2,
+                        isStar: Math.random() > 0.4
+                    });
+                }
+
+                if (!animId) {
+                    animateStardust();
+                }
+            }
+
+            function animateStardust() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const now = performance.now() * 0.006;
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vx *= 0.975;
+                    p.vy *= 0.975;
+                    p.alpha -= p.decay;
+
+                    if (p.alpha <= 0) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+
+                    const twinkle = 0.65 + 0.35 * Math.sin(now + p.twinkleOffset);
+                    ctx.save();
+                    ctx.globalAlpha = Math.max(0, p.alpha * twinkle);
+                    ctx.fillStyle = p.color;
+                    ctx.translate(p.x, p.y);
+
+                    if (p.isStar) {
+                        ctx.beginPath();
+                        ctx.moveTo(0, -p.size * 1.4);
+                        ctx.lineTo(p.size * 0.45, 0);
+                        ctx.lineTo(0, p.size * 1.4);
+                        ctx.lineTo(-p.size * 0.45, 0);
+                        ctx.closePath();
+                        ctx.fill();
+                    } else {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, p.size * 0.65, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                }
+
+                if (particles.length > 0) {
+                    animId = requestAnimationFrame(animateStardust);
+                } else {
+                    animId = null;
+                }
+            }
+        });
+    </script>
+
+</body></html>
